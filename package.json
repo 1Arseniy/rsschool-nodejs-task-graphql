@@ -46,7 +46,6 @@
     "fastify-cli": "^6.0.0",
     "fastify-plugin": "^4.0.0",
     "graphql": "^16.6.0",
-    "graphql-depth-limit": "^1.1.0",
     "graphql-parse-resolve-info": "^4.13.0"
   },
   "devDependencies": {
