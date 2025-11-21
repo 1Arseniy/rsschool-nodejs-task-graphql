@@ -6,10 +6,11 @@ import {
   GraphQLString,
   GraphQLEnumType,
 } from 'graphql';
+import { GraphQLContext } from '../type.js';
 
 export enum MemberTypeId {
-  BASIC = 1,
-  BUSINESS = 2,
+  BASIC,
+  BUSINESS,
 }
 
 export type TypeMemberType = {
@@ -23,20 +24,16 @@ export type TypeMemberTypes = TypeMemberType[];
 export const memberTypeEnum = new GraphQLEnumType({
   name: 'MemberTypeId',
   values: {
-    BASIC: {
-      value: 1,
-    },
-    BUSINESS: {
-      value: 2,
-    },
+    BASIC: { value: 'BASIC' },
+    BUSINESS: { value: 'BUSINESS' },
   },
 });
 
-export const memberType = new GraphQLObjectType({
-  name: 'memberType',
+export const memberType = new GraphQLObjectType<TypeMemberType, GraphQLContext>({
+  name: 'MemberType',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(memberTypeEnum),
     },
     discount: {
       type: new GraphQLNonNull(GraphQLFloat),
