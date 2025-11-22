@@ -11,7 +11,7 @@ import { GraphQLContext } from '../type.js';
 import { UUIDType } from './uuid.js';
 
 export type TypeProfile = {
-  id: UUID;
+  id: string;
   isMale: boolean;
   yearOfBirth: number;
   memberType: TypeMemberType;
@@ -33,6 +33,9 @@ export const Profile = new GraphQLObjectType<TypeProfile, GraphQLContext>({
     },
     memberType: {
       type: new GraphQLNonNull(memberType),
+      resolve: async (src, _, { prisma }) => {
+        return prisma.profile.findUnique({ where: { id: src.id } }).memberType();
+      },
     },
   }),
 });

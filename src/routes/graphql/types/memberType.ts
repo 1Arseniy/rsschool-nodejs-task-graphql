@@ -7,11 +7,12 @@ import {
   GraphQLEnumType,
 } from 'graphql';
 import { GraphQLContext } from '../type.js';
+import { MemberTypeId } from '../../member-types/schemas.js';
 
-export enum MemberTypeId {
-  BASIC,
-  BUSINESS,
-}
+// export enum MemberTypeId {
+//   BASIC,
+//   BUSINESS,
+// }
 
 export type TypeMemberType = {
   id: MemberTypeId;

@@ -13,7 +13,7 @@ import { GraphQLContext } from '../type.js';
 import { UUIDType } from './uuid.js';
 
 export type TypeUser = {
-  id: UUID;
+  id: string;
   name: string;
   balance: number;
   profile: TypeProfile;

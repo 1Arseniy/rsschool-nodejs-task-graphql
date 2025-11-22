@@ -15,7 +15,7 @@ import {
   memberType,
   memberTypeEnum,
   TypeMemberTypes,
-  MemberTypeId,
+  // MemberTypeId,
 } from './types/memberType.js';
 
 import { User, TypeUsers } from './types/user.js';
@@ -23,6 +23,7 @@ import { Profile, TypeProfiles } from './types/profile.js';
 import { PrismaClient } from '@prisma/client';
 import { UUIDType } from './types/uuid.js';
 import { GraphQLContext } from './type.js';
+import { MemberTypeId } from '../member-types/schemas.js';
 
 const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
   name: 'RootQueryType',
@@ -34,12 +35,14 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
           type: new GraphQLNonNull(memberTypeEnum),
         },
       },
-      resolve: (_src, { id }: { id: string }, { prisma }) => {
-        return prisma.memberType.findUnique({
-          where: {
-            id,
-          },
-        });
+      resolve: async (_src, { id }: { id: string }, { prisma }) => {
+        return (
+          (await prisma.memberType.findUnique({
+            where: {
+              id,
+            },
+          })) || null
+        );
       },
     },
 
@@ -54,15 +57,17 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
       type: new GraphQLNonNull(User),
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLID),
+          type: UUIDType,
         },
       },
-      resolve: (_src, { id }: { id: string }, { prisma }) => {
-        return prisma.user.findUnique({
-          where: {
-            id,
-          },
-        });
+      resolve: async (_src, { id }: { id: string }, { prisma }) => {
+        return (
+          (await prisma.user.findUnique({
+            where: {
+              id,
+            },
+          })) || null
+        );
       },
     },
 
@@ -77,15 +82,17 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
       type: new GraphQLNonNull(Profile),
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLID),
+          type: UUIDType,
         },
       },
-      resolve: (_src, { id }: { id: string }, { prisma }) => {
-        return prisma.profile.findUnique({
-          where: {
-            id,
-          },
-        });
+      resolve: async (_src, { id }: { id: string }, { prisma }) => {
+        return (
+          (await prisma.profile.findUnique({
+            where: {
+              id,
+            },
+          })) || null
+        );
       },
     },
 
@@ -100,15 +107,11 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
       type: new GraphQLNonNull(Post),
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLID),
+          type: UUIDType,
         },
       },
-      resolve: (_src, { id }: { id: string }, { prisma }) => {
-        return prisma.post.findUnique({
-          where: {
-            id,
-          },
-        });
+      resolve: async (_src, { id }: { id: string }, { prisma }) => {
+        return (await prisma.post.findUnique({ where: { id } })) || null;
       },
     },
 
