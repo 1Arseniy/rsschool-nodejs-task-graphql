@@ -4,26 +4,21 @@ import {
   graphql,
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLID,
   GraphQLNonNull,
   GraphQLList,
+  validate,
+  specifiedRules,
+  parse,
 } from 'graphql';
-import { randomUUID, UUID } from 'crypto';
 
-import { TypePosts, Post } from './types/post.js';
-import {
-  memberType,
-  memberTypeEnum,
-  TypeMemberTypes,
-  // MemberTypeId,
-} from './types/memberType.js';
+import { Post } from './types/post.js';
+import { memberType, memberTypeEnum } from './types/memberType.js';
 
-import { User, TypeUsers } from './types/user.js';
-import { Profile, TypeProfiles } from './types/profile.js';
-import { PrismaClient } from '@prisma/client';
+import { User } from './types/user.js';
+import { Profile } from './types/profile.js';
 import { UUIDType } from './types/uuid.js';
 import { GraphQLContext } from './type.js';
-import { MemberTypeId } from '../member-types/schemas.js';
+import depthLimit from 'graphql-depth-limit';
 
 const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
   name: 'RootQueryType',
@@ -49,7 +44,7 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
     memberTypes: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(memberType))),
       resolve: async (_src, _args, { prisma }) => {
-        return prisma.memberType.findMany();
+        return await prisma.memberType.findMany();
       },
     },
 
@@ -74,7 +69,7 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
     users: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
       resolve: async (_src, _args, { prisma }) => {
-        return prisma.user.findMany();
+        return await prisma.user.findMany();
       },
     },
 
@@ -99,7 +94,7 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
     profiles: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Profile))),
       resolve: async (_src, _args, { prisma }) => {
-        return prisma.profile.findMany();
+        return await prisma.profile.findMany();
       },
     },
 
@@ -118,7 +113,7 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
     posts: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Post))),
       resolve: async (_src, _args, { prisma }) => {
-        return prisma.post.findMany();
+        return await prisma.post.findMany();
       },
     },
   }),
@@ -127,6 +122,8 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
 const schema = new GraphQLSchema({
   query: queryType,
 });
+
+const maxDepth = 5;
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
@@ -140,7 +137,17 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         200: gqlResponseSchema,
       },
     },
-    async handler(req) {
+    async handler(req, res) {
+      const document = parse(req.body.query);
+      const errors = validate(schema, document, [
+        ...specifiedRules,
+        depthLimit(maxDepth),
+      ]);
+
+      if (errors.length > 0) {
+        return res.send({ errors });
+      }
+
       return graphql({
         schema,
         source: req.body.query,
