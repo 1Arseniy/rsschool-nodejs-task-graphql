@@ -4,12 +4,12 @@ import {
   GraphQLString,
   GraphQLFloat,
   GraphQLList,
+  GraphQLInputObjectType,
 } from 'graphql';
 import { Profile, TypeProfile } from './profile.js';
 import { Post, TypePosts } from './post.js';
 import { GraphQLContext } from '../type.js';
 import { UUIDType } from './uuid.js';
-import { subscribeToUserSchema } from '../../users/_userId/user-subscribed-to/schemas.js';
 
 export type TypeUser = {
   id: string;
@@ -54,11 +54,6 @@ export const User = new GraphQLObjectType<TypeUser, GraphQLContext>({
     userSubscribedTo: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
       resolve: async (src, _args, { prisma }) => {
-        // const a = await prisma.subscribersOnAuthors({
-        //   where: {
-        //     aut
-        //   }
-        // })
         return await prisma.user.findMany({
           where: {
             userSubscribedTo: {
@@ -88,5 +83,21 @@ export const User = new GraphQLObjectType<TypeUser, GraphQLContext>({
         });
       },
     },
+  }),
+});
+
+export const ChangeUserInput = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
+  fields: () => ({
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+  }),
+});
+
+export const CreateUserInput = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: () => ({
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    balance: { type: new GraphQLNonNull(GraphQLFloat) },
   }),
 });
