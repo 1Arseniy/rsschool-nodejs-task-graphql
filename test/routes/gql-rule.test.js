@@ -36,8 +36,6 @@ await test('gql-rule', async (t) => {
       },
     });
 
-    console.log('!!!!!!!!!!', errors);
-
     t.ok(errors.length === 1);
     const message = errors[0].message;
     // Error message from graphql-depth-limit package

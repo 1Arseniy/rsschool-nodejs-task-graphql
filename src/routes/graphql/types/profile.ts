@@ -1,12 +1,5 @@
-import {
-  GraphQLObjectType,
-  GraphQLID,
-  GraphQLNonNull,
-  GraphQLBoolean,
-  GraphQLInt,
-} from 'graphql';
+import { GraphQLObjectType, GraphQLNonNull, GraphQLBoolean, GraphQLInt } from 'graphql';
 import { memberType, TypeMemberType } from './memberType.js';
-import { UUID } from 'crypto';
 import { GraphQLContext } from '../type.js';
 import { UUIDType } from './uuid.js';
 
@@ -34,7 +27,7 @@ export const Profile = new GraphQLObjectType<TypeProfile, GraphQLContext>({
     memberType: {
       type: new GraphQLNonNull(memberType),
       resolve: async (src, _, { prisma }) => {
-        return prisma.profile.findUnique({ where: { id: src.id } }).memberType();
+        return prisma.profile.findUnique({ where: { id: src.id } });
       },
     },
   }),

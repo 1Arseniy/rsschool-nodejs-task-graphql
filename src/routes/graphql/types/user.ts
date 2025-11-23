@@ -1,5 +1,4 @@
 import {
-  GraphQLID,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
@@ -8,15 +7,15 @@ import {
 } from 'graphql';
 import { Profile, TypeProfile } from './profile.js';
 import { Post, TypePosts } from './post.js';
-import { UUID } from 'crypto';
 import { GraphQLContext } from '../type.js';
 import { UUIDType } from './uuid.js';
+import { subscribeToUserSchema } from '../../users/_userId/user-subscribed-to/schemas.js';
 
 export type TypeUser = {
   id: string;
   name: string;
   balance: number;
-  profile: TypeProfile;
+  profile: TypeProfile | null;
   posts: TypePosts;
   userSubscribedTo: TypeUsers;
   subscribedToUser: TypeUsers;
@@ -38,21 +37,35 @@ export const User = new GraphQLObjectType<TypeUser, GraphQLContext>({
     },
     profile: {
       type: Profile,
-      resolve: (src, _args, { prisma }) => {
-        return prisma.profile.findUnique({ where: { id: src.id } });
+      resolve: async (src, _args, { prisma }) => {
+        return (await prisma.profile.findUnique({ where: { id: src.id } })) || null;
       },
     },
     posts: {
-      type: new GraphQLNonNull(new GraphQLList(Post)),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Post))),
+      resolve: async (src, _args, { prisma }) => {
+        return await prisma.post.findUnique({
+          where: {
+            id: src.id,
+          },
+        });
+      },
     },
     userSubscribedTo: {
-      type: new GraphQLNonNull(new GraphQLList(User)),
-      resolve: (src, _args, { prisma }) => {
-        return prisma.user.findMany({
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
+      resolve: async (src, _args, { prisma }) => {
+        // const a = await prisma.subscribersOnAuthors({
+        //   where: {
+        //     aut
+        //   }
+        // })
+        return await prisma.user.findMany({
           where: {
             userSubscribedTo: {
               some: {
-                subscriberId: src.id,
+                subscriber: {
+                  id: src.id,
+                },
               },
             },
           },
@@ -60,13 +73,15 @@ export const User = new GraphQLObjectType<TypeUser, GraphQLContext>({
       },
     },
     subscribedToUser: {
-      type: new GraphQLNonNull(new GraphQLList(User)),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
       resolve: (src, _args, { prisma }) => {
         return prisma.user.findMany({
           where: {
             subscribedToUser: {
               some: {
-                authorId: src.id,
+                author: {
+                  id: src.id,
+                },
               },
             },
           },

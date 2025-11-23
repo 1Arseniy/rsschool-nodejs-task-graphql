@@ -1,5 +1,4 @@
-// import { UUID } from 'crypto';
-import { GraphQLID, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
 import { GraphQLContext } from '../type.js';
 import { UUIDType } from './uuid.js';
 

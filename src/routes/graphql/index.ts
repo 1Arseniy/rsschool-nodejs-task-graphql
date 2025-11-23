@@ -24,7 +24,7 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
   name: 'RootQueryType',
   fields: () => ({
     memberType: {
-      type: new GraphQLNonNull(memberType),
+      type: memberType,
       args: {
         id: {
           type: new GraphQLNonNull(memberTypeEnum),
@@ -49,10 +49,10 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
     },
 
     user: {
-      type: new GraphQLNonNull(User),
+      type: User,
       args: {
         id: {
-          type: UUIDType,
+          type: new GraphQLNonNull(UUIDType),
         },
       },
       resolve: async (_src, { id }: { id: string }, { prisma }) => {
@@ -74,10 +74,10 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
     },
 
     profile: {
-      type: new GraphQLNonNull(Profile),
+      type: Profile,
       args: {
         id: {
-          type: UUIDType,
+          type: new GraphQLNonNull(UUIDType),
         },
       },
       resolve: async (_src, { id }: { id: string }, { prisma }) => {
@@ -97,12 +97,11 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
         return await prisma.profile.findMany();
       },
     },
-
     post: {
-      type: new GraphQLNonNull(Post),
+      type: Post,
       args: {
         id: {
-          type: UUIDType,
+          type: new GraphQLNonNull(UUIDType),
         },
       },
       resolve: async (_src, { id }: { id: string }, { prisma }) => {
@@ -118,9 +117,25 @@ const queryType = new GraphQLObjectType<unknown, GraphQLContext>({
     },
   }),
 });
+// createUser(dto: CreateUserInput!): User!
+/* const mutationType = new GraphQLObjectType<unknown, GraphQLContext>({
+  name: 'Mutations',
+  fields: () => ({
+    createUser: {
+      type: new GraphQLNonNull(User),
+      args: {
+        dto: {
+          type: 
+        }
+      }
+    }
+
+  })
+}) */
 
 const schema = new GraphQLSchema({
   query: queryType,
+  // mutation: mutationType
 });
 
 const maxDepth = 5;
